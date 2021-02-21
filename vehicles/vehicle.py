@@ -1,11 +1,13 @@
 
 class Vehicle(object):
     STEP_SIZE = 0.1 # s update rate - used for dynamics
-    def __init__(self, lane_id, x, v):
+    def __init__(self, id, lane_id, x, v):
         self.v = v # longitudinal speed [m/s]
         self.lane_id = lane_id # inner most right is 1
         self.y = 0 # lane relative
         self.x = x # global coordinate
+        self.id = id # 'sdv' or any other integer
+        self.y = 2*lane_id*1.85-1.85
 
     def act(self):
         """
@@ -13,14 +15,8 @@ class Vehicle(object):
         """
         pass
 
-    def update_lane(self):
-        if self.y >= 1.85 and action[1] > 0:
-            self.lane_id += 1
-            self.y = -self.y + y_delta
-
-        if self.y <= -1.85 and action[1] < 0:
-            self.lane_id -= 1
-            self.y = -self.y + y_delta
+    def observe(self):
+        raise NotImplementedError
 
     def act(self):
         raise NotImplementedError
@@ -29,10 +25,20 @@ class Vehicle(object):
         """Defines simple vehicle dynamics.
         param: action: [long_acc, lat_speed]
         """
-        self.x = self.x + self.v * self.step_size \
-                                    + 0.5 * action[0] * self.step_size **2
+        self.x = self.x + self.v * self.STEP_SIZE \
+                                    + 0.5 * action[0] * self.STEP_SIZE **2
 
-        y_delta = action[1]*self.step_size
-        self.y += y_delta
-        self.v = self.v + action[0] * self.step_size
-        self.update_lane(self)
+
+        self.v = self.v + action[0] * self.STEP_SIZE
+        
+        if action[1] != 0:
+            y_delta = action[1]*self.STEP_SIZE
+            self.y += y_delta
+
+            if self.y >= 1.85 and action[1] > 0:
+                self.lane_id += 1
+                self.y = -self.y + y_delta
+
+            if self.y <= -1.85 and action[1] < 0:
+                self.lane_id -= 1
+                self.y = -self.y + y_delta

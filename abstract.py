@@ -50,8 +50,8 @@ class AbstractPlanner(object):
             node = node.children[decision]
         return decisions
 
-    def step(self, state, observation, decision):
-        observation, reward, terminal = state.decision_step(observation, decision)
+    def step(self, state, decision):
+        observation, reward, terminal = state.step(decision)
         return observation, reward, terminal
 
     def reset(self):
