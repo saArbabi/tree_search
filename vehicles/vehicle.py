@@ -30,15 +30,16 @@ class Vehicle(object):
 
 
         self.v = self.v + action[0] * self.STEP_SIZE
-        
+
         if action[1] != 0:
+            left_lane_bound = 2*self.lane_id*1.85
+            righ_lane_bound = 2*self.lane_id*1.85-3.7
+
             y_delta = action[1]*self.STEP_SIZE
             self.y += y_delta
 
-            if self.y >= 1.85 and action[1] > 0:
+            if self.y >= left_lane_bound and action[1] > 0:
                 self.lane_id += 1
-                self.y = -self.y + y_delta
 
-            if self.y <= -1.85 and action[1] < 0:
+            if self.y <= righ_lane_bound and action[1] < 0:
                 self.lane_id -= 1
-                self.y = -self.y + y_delta

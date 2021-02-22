@@ -9,7 +9,7 @@ class SDVehicle(Vehicle):
                 2: ['LK', 'IDLE'],
                 3: ['LCL', 'UP'],
                 4: ['LCL', 'DOWN'],
-                5: ['LCR', 'IDLE'],
+                5: ['LCL', 'IDLE'],
                 6: ['LCR', 'UP'],
                 7: ['LCR', 'DOWN'],
                 8: ['LCR', 'IDLE']

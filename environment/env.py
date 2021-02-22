@@ -27,7 +27,7 @@ class Env():
         return  self.sdv.observe(self.vehicles)
 
     def default_config(self):
-        self.config = {'lane_count':5,
+        self.config = {'lane_count':2,
                         'lane_width':3.7, # m
                         'lane_length':10000, # m
                         'percept_range':70, # m, front and back
@@ -57,7 +57,7 @@ class Env():
             self.viewer = Viewer(self.config)
             # self.viewer.PAUSE_CONTROL = PAUSE_CONTROL
 
-        self.viewer.draw_traffic(self.vehicles)
+        self.viewer.update_plots(self.vehicles)
 
     def gen_idm_vehicles(self, gap_min, gap_max, v_min, v_max):
         id = 0
@@ -85,6 +85,7 @@ class Env():
 
         if terminal:
             reward += self.COLLISION_REWARD
-        if self.sdv.lane_id != 5:
-            reward -= 5
+
+        if self.sdv.lane_id == 1:
+            reward = 0.5
         return reward

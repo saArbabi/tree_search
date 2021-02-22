@@ -16,8 +16,6 @@ class MCTSDPW(AbstractPlanner):
         :param config: the mcts configuration. Use default if None.
         :param rollout_policy: the rollout policy used to estimate the value of a leaf node
         """
-        # self.env = env
-        # self.remaining_budget = remaining_budget
         self.config = self.default_config()
         super(MCTSDPW, self).__init__()
 
@@ -40,19 +38,24 @@ class MCTSDPW(AbstractPlanner):
         self.root = DecisionNode(parent=None, planner=self)
 
     def get_available_decisions(self, state):
-        return [2, 5]
-        # if state.ego.act_lat > 0 and abs(state.ego.y) > 1:
-        #     """Ego performing lc left """
-        #     return [3, 4, 5]
-        # elif state.ego.act_lat < 0 and abs(state.ego.y) > 1:
-        #     """Ego performing lc right """
-        #     return [6, 7, 8]
-        # elif state.ego.lane_id == 1:
-        #     return [0, 1, 2, 3, 4, 5]
-        # elif state.ego.lane_id == 2:
-        #     return [0, 1, 2, 6, 7, 8]
+        if state.sdv.lane_id == 1:
+            # most right lane
+            return [0, 1, 2, 3, 4, 5]
+        elif state.sdv.lane_id == state.config['lane_count']:
+            # most left lane
+            return [0, 1, 2, 6, 7, 8]
+        else:
+            return [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
+    def extract_belief_info(self, state, depth):
+        self.belief_info[depth] = {}
+        self.belief_info[depth]['xs'] = [veh.x for veh in state.vehicles if veh.id != 'sdv']
+        self.belief_info[depth]['ys'] = [veh.y for veh in state.vehicles if veh.id != 'sdv']
 
+    def extract_tree_info(self, tree_states):
+        self.tree_info.append(tree_states)
+            # tree_states['x'].append(state.sdv.x)
+            # tree_states['y'].append(state.sdv.y)
     def run(self, state, observation):
         """
             Run an iteration of MCTSDPW, starting from a given state
@@ -65,19 +68,13 @@ class MCTSDPW(AbstractPlanner):
 
         terminal = False
         tree_states = {'x':[], 'y':[]}
-        # state.seed(self.np_random.randint(2**30))
-        # traj_n = [[], []]# trajectory for a given mcts iteration
         while depth < self.config['horizon'] and \
                 (decision_node.count != 0 or decision_node == self.root) and not terminal:
 
-            # perform an decision followed by a transition
-            # traj_n[0].append(observation['ego']['x'])
-            # traj_n[1].append(observation['ego']['y_cor'])
-
-            # state.sdv.y
             tree_states['x'].append(state.sdv.x)
             tree_states['y'].append(state.sdv.y)
 
+            # perform an decision followed by a transition
             chance_node, decision = decision_node.get_child(state, temperature=self.config['temperature'])
             observation, reward, terminal = self.step(state, decision)
             node_observation = observation if self.config["closed_loop"] else None
@@ -85,17 +82,14 @@ class MCTSDPW(AbstractPlanner):
 
             total_reward += self.config["gamma"] ** depth * reward
             depth += 1
+            self.extract_belief_info(state, depth)
 
-        # print(depth)
-        # self.env.ego.traj.append(traj_n)
+        self.extract_tree_info(tree_states)
 
-        # reached a leaf node
-
-        # if not terminal:
-        total_reward = self.evaluate(state, total_reward, depth=depth)
+        if not terminal:
+            total_reward = self.evaluate(state, total_reward, depth=depth)
         # Backup global statistics
         decision_node.backup_to_root(total_reward)
-        return tree_states
 
     def evaluate(self, state, total_reward=0, depth=0):
         """
@@ -116,26 +110,15 @@ class MCTSDPW(AbstractPlanner):
 
 
     def plan(self, state, observation):
-        # while self.remaining_budget > 0:
-            # t_start = time.time()
-            # self.run(safe_deepcopy_env(state), observation)
-            # t_end = time.time()
-            # self.remaining_budget -= (t_end - t_start)
-        itr_trees = []
-
-        # self.env.ego.traj = []
-        for i in range(10):
-            tree_states = self.run(safe_deepcopy_env(state), observation)
-            itr_trees.append(tree_states)
-        return itr_trees
-
+        self.tree_info = []
+        self.belief_info = {}
+        for i in range(50):
+            self.run(safe_deepcopy_env(state), observation)
 
     def get_decision(self):
         """Only return the first decision, the rest is conditioned on observations"""
         chosen_decision, decision_counts = self.root.selection_rule()
-        # self.env.ego.decision_counts = decision_counts
-        return chosen_decision
-
+        return chosen_decision, decision_counts
 
 class DecisionNode(Node):
     K = 1.0

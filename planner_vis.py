@@ -16,22 +16,29 @@ env = Env()
 
 # v1 = IDMVehicle(id=1, lane_id=3, x=18, v=10)
 # v2 = IDMVehicle(id=2, lane_id=3, x=20, v=10)
-env.sdv = SDVehicle(id='sdv', lane_id=5, x=20, v=10, env=env)
+env.sdv = SDVehicle(id='sdv', lane_id=2, x=50, v=10, env=env)
 env.vehicles.append(env.sdv)
-env.gen_idm_vehicles(gap_min=20, gap_max=30, v_min=10, v_max=12)
+env.gen_idm_vehicles(gap_min=10, gap_max=30, v_min=10, v_max=12)
 
 obs = env.reset()
 env.render()
 
-for i in range(30):
+for i in range(20):
     # env.render()
-    itr_trees = env.sdv.planner.plan(env, obs) # TODO, get visualisation outputs
-    decision = env.sdv.planner.get_decision()
-    env.viewer.itr_trees = itr_trees
+    env.sdv.planner.plan(env, obs) # TODO, get visualisation outputs
+    decision, decision_counts = env.sdv.planner.get_decision()
+    env.viewer.tree_info = env.sdv.planner.tree_info
+    env.viewer.belief_info = env.sdv.planner.belief_info
+    env.viewer.decision_counts = decision_counts
     env.render()
-    input("Press Enter to step to the next state ...")
+    user_in = input("Do you wanna continue?")
+    print(env.sdv.lane_id)
+    if user_in != 'y':
+        break
     obs, reward, terminal = env.step(decision)
+    print('observation: ', obs)
+    print('terminal: ', terminal)
 
 # %%
-
-# %%
+sam = np.random.normal(0, 0.1, 10000)
+count, bins, ignored  = plt.hist(sam, 50, density=True)
