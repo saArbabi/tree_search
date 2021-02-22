@@ -48,9 +48,12 @@ class MCTSDPW(AbstractPlanner):
             return [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
     def extract_belief_info(self, state, depth):
-        self.belief_info[depth] = {}
-        self.belief_info[depth]['xs'] = [veh.x for veh in state.vehicles if veh.id != 'sdv']
-        self.belief_info[depth]['ys'] = [veh.y for veh in state.vehicles if veh.id != 'sdv']
+        if depth not in self.belief_info:
+            self.belief_info[depth] = {}
+            self.belief_info[depth]['xs'] = [veh.x for veh in state.vehicles if veh.id != 'sdv']
+            self.belief_info[depth]['ys'] = [veh.y for veh in state.vehicles if veh.id != 'sdv']
+        self.belief_info[depth]['xs'].extend([veh.x for veh in state.vehicles if veh.id != 'sdv'])
+        self.belief_info[depth]['ys'].extend([veh.y for veh in state.vehicles if veh.id != 'sdv'])
 
     def extract_tree_info(self, tree_states):
         self.tree_info.append(tree_states)
@@ -66,6 +69,7 @@ class MCTSDPW(AbstractPlanner):
         total_reward = 0
         depth = 0
 
+        state.seed(self.np_random.randint(2**30))
         terminal = False
         tree_states = {'x':[], 'y':[]}
         while depth < self.config['horizon'] and \

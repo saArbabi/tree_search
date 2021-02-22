@@ -39,6 +39,5 @@ for i in range(20):
     print('observation: ', obs)
     print('terminal: ', terminal)
 
-# %%
-sam = np.random.normal(0, 0.1, 10000)
-count, bins, ignored  = plt.hist(sam, 50, density=True)
+
+# %% 

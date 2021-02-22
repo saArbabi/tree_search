@@ -14,7 +14,7 @@ class Env():
     LANE_CHANGE_REWARD = -0.1
     """The reward received at each lane change decision."""
 
-    COLLISION_REWARD = -5
+    COLLISION_REWARD = -10
     """The reward received when two cars collide."""
 
     def __init__(self):
@@ -22,6 +22,12 @@ class Env():
         self.vehicles = [] # all vehicles
         self.env_clock = 0 # time past since the episode's start
         self.default_config()
+        self.seed()
+
+    def seed(self, seed_value=2021):
+        for veh in self.vehicles:
+            if veh.id != 'sdv':
+                veh.seed(seed_value)
 
     def reset(self):
         return  self.sdv.observe(self.vehicles)

@@ -8,9 +8,13 @@ class IDMVehicle(Vehicle):
             self.default_config()
         else:
             self.idm_param = idm_param
-
-        self.leader = None # specify before acting
+        self.seed()
         # TODO params can also be learned
+
+    def seed(self, seed_value=2021):
+        self.rng = np.random.RandomState()
+        self.rng.seed(seed_value)
+
     def default_config(self):
         # TODO nonstationary params
         self.idm_param = {
@@ -36,7 +40,7 @@ class IDMVehicle(Vehicle):
         desired_gap = self.get_desired_gap(obs['dv'])
         acc = self.max_acc*(1-(self.v/self.desired_v)**4-\
                                             (desired_gap/obs['dx'])**2)
-        acc += np.random.normal(0, 0.1, 1)
+        acc += self.rng.normal(0, 1, 1)
         return [sorted([-3, acc, 3])[1], 0]
 
     def observe(self, vehicles):
