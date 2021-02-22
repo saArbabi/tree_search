@@ -41,9 +41,10 @@ class Env():
 
     def step(self, decision):
         self.sdv.time_budget = 1
+        # low-level actions currently not obs dependant
         sdv_obs = self.sdv.observe(self.vehicles)
-        sdv_action = self.sdv.act(decision, sdv_obs)
         while self.sdv.time_budget > 0:
+            sdv_action = self.sdv.act(decision, sdv_obs)
             self.sdv.step(sdv_action)
             for vehicle in self.vehicles:
                 if vehicle.id == 'sdv':

@@ -31,13 +31,17 @@ for i in range(20):
     env.viewer.belief_info = env.sdv.planner.belief_info
     env.viewer.decision_counts = decision_counts
     env.render()
+
     user_in = input("Do you wanna continue?")
-    print(env.sdv.lane_id)
     if user_in != 'y':
         break
     obs, reward, terminal = env.step(decision)
+
+    ###############
     print('observation: ', obs)
+    print('lane_id: ', env.sdv.lane_id)
     print('terminal: ', terminal)
+    print('decision: ', decision)
+    ###############
 
-
-# %% 
+# %%

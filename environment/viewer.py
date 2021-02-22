@@ -5,9 +5,9 @@ import numpy as np
 class Viewer():
     def __init__(self, env_config):
         self.env_config  = env_config
-        self.fig = plt.figure(figsize=(10, 2))
-        self.env_ax = self.fig.add_subplot()
-        self.decision_bar_ax = plt.figure().add_subplot()
+        self.fig = plt.figure(figsize=(7, 7))
+        self.env_ax = self.fig.add_subplot(211)
+        self.decision_bar_ax = self.fig.add_subplot(212)
         self.tree_info = None
         self.belief_info = None
         self.decision_counts = None

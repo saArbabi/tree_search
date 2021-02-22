@@ -38,6 +38,8 @@ class MCTSDPW(AbstractPlanner):
         self.root = DecisionNode(parent=None, planner=self)
 
     def get_available_decisions(self, state):
+        while abs(state.sdv.lane_offset) > 0.3:
+            return [0, 1, 2]
         if state.sdv.lane_id == 1:
             # most right lane
             return [0, 1, 2, 3, 4, 5]
@@ -114,6 +116,7 @@ class MCTSDPW(AbstractPlanner):
 
 
     def plan(self, state, observation):
+        self.reset()
         self.tree_info = []
         self.belief_info = {}
         for i in range(50):
