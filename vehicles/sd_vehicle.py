@@ -20,21 +20,15 @@ class SDVehicle(Vehicle):
         self.env = env
         self.planner = MCTSDPW()
         self.time_budget = 1 # s
-        self.target_lane = lane_id
-        self.lane_offset = 0
 
 
     def act(self, decision, obs):
-        if self.time_budget == 1:
-            if self.OPTIONS[decision][0] == 'LK':
-                pass
-            elif self.OPTIONS[decision][0] == 'LCL':
-                self.target_lane += 1
-            elif self.OPTIONS[decision][0] == 'LCR':
-                self.target_lane -= 1
-
-        self.lane_offset = (2*self.target_lane*1.85-1.85)-self.y
-        act_lat = 0.1*self.lane_offset
+        if self.OPTIONS[decision][0] == 'LK':
+            act_lat = 0
+        elif self.OPTIONS[decision][0] == 'LCL':
+            act_lat = 0.75
+        elif self.OPTIONS[decision][0] == 'LCR':
+            act_lat = -0.75
 
         if self.OPTIONS[decision][1] == 'IDLE':
             act_long = 0
@@ -54,7 +48,7 @@ class SDVehicle(Vehicle):
         candid_dx = None
         for vehicle in vehicles:
             if vehicle.id != self.id and vehicle.lane_id == self.lane_id and \
-                                                            vehicle.x > self.x:
+                                                            vehicle.x >= self.x:
 
                 if not candid_veh:
                     candid_veh = vehicle
@@ -73,7 +67,7 @@ class SDVehicle(Vehicle):
         candid_dx = None
         for vehicle in vehicles:
             if vehicle.id != self.id and vehicle.lane_id == self.lane_id and \
-                                                            vehicle.x < self.x:
+                                                            vehicle.x <= self.x:
 
                 if not candid_veh:
                     candid_veh = vehicle

@@ -42,6 +42,8 @@ class IDMVehicle(Vehicle):
                                             (desired_gap/obs['dx'])**2)
         acc += self.rng.normal(0, 1, 1)
         return [sorted([-3, acc, 3])[1], 0]
+        # return [0, 0]
+        # return [np.random.uniform(-2,2), 0]
 
     def observe(self, vehicles):
         """
@@ -51,7 +53,7 @@ class IDMVehicle(Vehicle):
         candid_dx = None
         for vehicle in vehicles:
             if vehicle.id != self.id and vehicle.lane_id == self.lane_id and \
-                                                            vehicle.x > self.x:
+                                                            vehicle.x >= self.x:
 
                 if not candid_veh:
                     candid_veh = vehicle

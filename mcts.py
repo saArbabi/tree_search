@@ -27,7 +27,7 @@ class MCTSDPW(AbstractPlanner):
             "closed_loop": True,
             "k_state": 1,
             "alpha_state": 0.3,
-            "k_decision": 3,
+            "k_decision": 1,
             "alpha_decision": 0.3,
             "horizon": 7
 
@@ -38,16 +38,16 @@ class MCTSDPW(AbstractPlanner):
         self.root = DecisionNode(parent=None, planner=self)
 
     def get_available_decisions(self, state):
-        while abs(state.sdv.lane_offset) > 0.3:
-            return [0, 1, 2]
-        if state.sdv.lane_id == 1:
-            # most right lane
-            return [0, 1, 2, 3, 4, 5]
-        elif state.sdv.lane_id == state.config['lane_count']:
-            # most left lane
-            return [0, 1, 2, 6, 7, 8]
-        else:
-            return [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        # while abs(state.sdv.lane_offset) > 0.3:
+        # if state.sdv.lane_id == 1:
+        #     # most right lane
+        #     return [0, 1, 2, 3, 4, 5]
+        # elif state.sdv.lane_id == state.config['lane_count']:
+        #     # most left lane
+        #     return [0, 1, 2, 6, 7, 8]
+        # else:
+        return [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        # return [2, 8]
 
     def extract_belief_info(self, state, depth):
         if depth not in self.belief_info:
@@ -119,7 +119,7 @@ class MCTSDPW(AbstractPlanner):
         self.reset()
         self.tree_info = []
         self.belief_info = {}
-        for i in range(50):
+        for i in range(100):
             self.run(safe_deepcopy_env(state), observation)
 
     def get_decision(self):
@@ -225,6 +225,8 @@ class ChanceNode(Node):
     def get_child(self, observation):
         import hashlib
         obs_id = hashlib.sha1(str(observation).encode("UTF-8")).hexdigest()[:5]
+        # print(len(self.children))
+        # print(observation)
         if obs_id not in self.children:
             if self.k_state*self.count**self.alpha_state < len(self.children):
                 obs_id = self.planner.np_random.choice(list(self.children))

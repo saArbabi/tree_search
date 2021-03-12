@@ -13,7 +13,7 @@ class Viewer():
         self.decision_counts = None
         #TODO: option to record video
 
-    def draw_scene(self, ax, percept_origin):
+    def draw_road(self, ax, percept_origin):
         lane_cor = self.env_config['lane_width']*self.env_config['lane_count']
         ax.hlines(0, 0, self.env_config['lane_length'], colors='k', linestyles='solid')
         ax.hlines(lane_cor, 0, self.env_config['lane_length'],
@@ -47,7 +47,7 @@ class Viewer():
             colors = cm.rainbow(np.linspace(1, 0, max_depth))
             depth = 1
             for c in colors:
-                ax.scatter(self.belief_info[depth]['xs'], self.belief_info[depth]['ys'], color=c, s=10)
+                ax.scatter(self.belief_info[depth]['xs'], self.belief_info[depth]['ys'], color=c, s=5)
                 depth += 1
 
     def draw_trees(self, ax):
@@ -62,29 +62,56 @@ class Viewer():
             decisions = self.decision_counts['decisions']
             counts =  self.decision_counts['counts']
 
-            poses = np.arange(len(self.decision_counts['decisions']))
-            lat_labels = [sdv.OPTIONS.get(key) for key in self.decision_counts['decisions']]
-            lat_labels = [item[0]+'_'+item[1] for item in lat_labels]
+            labels = list(sdv.OPTIONS.values())
+            labels = [item[0]+'_'+item[1] for item in labels]
+            label_pos = np.arange(len(labels))
+            label_values = {
+                            0: 0,
+                            1: 0,
+                            2: 0,
+                            3: 0,
+                            4: 0,
+                            5: 0,
+                            6: 0,
+                            7: 0,
+                            8: 0
+                        }
 
+            label_color = {
+                            0: 'grey',
+                            1: 'grey',
+                            2: 'grey',
+                            3: 'grey',
+                            4: 'grey',
+                            5: 'grey',
+                            6: 'grey',
+                            7: 'grey',
+                            8: 'grey'
+                        }
 
-            colors = ['green' if val == max(self.decision_counts['counts']) else \
-                                    'grey' for val in self.decision_counts['counts']]
+            max_count = max(counts)
+            for i in range(len(decisions)):
+                label_values[decisions[i]] = counts[i]
+                if counts[i] == max_count:
+                    label_color[decisions[i]] =  'green'
 
-            ax.set_xticks(poses)
-            ax.set_xticklabels(lat_labels, rotation=90)
-            fig_obj = ax.bar(poses, self.decision_counts['counts'], align='center', \
-                                                    width=0.5, color=colors)
+            ax.set_xticks(label_pos)
+            ax.set_xticklabels(labels, rotation=90)
+            fig_obj = ax.bar(label_pos, list(label_values.values()), align='center', \
+                                                    width=0.5, color=list(label_color.values()))
 
     def draw_env(self, ax, vehicles):
-        sdv = vehicles[0]
+        ego_id = int(len(vehicles)/2)
+        sdv = vehicles[ego_id] # ego is first in list
         ax.clear()
-        self.draw_scene(ax, percept_origin = sdv.x)
+        self.draw_road(ax, percept_origin = sdv.x)
         self.draw_vehicles(ax, vehicles)
         self.draw_trees(ax)
         self.draw_beliefs(ax)
 
     def update_plots(self, vehicles):
-        sdv = vehicles[0]
+        sdv = vehicles[5]
         self.draw_env(self.env_ax, vehicles)
         self.draw_decision_counts(self.decision_bar_ax, sdv)
-        plt.pause(0.0001)
+        plt.pause(0.00001)
+        # plt.show()

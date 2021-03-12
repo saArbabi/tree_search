@@ -57,7 +57,6 @@ class AbstractPlanner(object):
     def reset(self):
         raise NotImplementedError
 
-
 class Node(object):
     """
         A tree node
